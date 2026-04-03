@@ -1,0 +1,42 @@
+name: VoidChat
+version: 1.0.0
+main: com.voidchat.VoidChatPlugin
+api-version: 1.13
+description: "Advanced local/global chat system with Anti-Swear, Chat Clear, and Toggle features."
+author: kuba_121
+
+folia-supported: true
+
+commands:
+  voidchat:
+    description: "Main command for VoidChat."
+    usage: "/<command> [reload|admin|global|clear|toggle|help]"
+    aliases: [vc, chat]
+    permission: voidchat.use
+    permission-message: "&cYou do not have permission to use this command!"
+  global:
+    description: "Send a global message to all players."
+    usage: "/global <message>"
+    aliases: [g]
+    permission: voidchat.use
+    permission-message: "&cYou do not have permission to use the global chat!"
+
+permissions:
+  voidchat.use:
+    description: "Allows use of basic /voidchat and /global commands."
+    default: true
+  voidchat.reload:
+    description: "Allows reloading the plugin configuration."
+    default: op
+  voidchat.admin:
+    description: "Access to Admin Spy, Chat Clear, and Chat Toggle."
+    default: op
+  voidchat.color:
+    description: "Allows using colors and HEX codes in chat messages."
+    default: op
+  voidchat.bypass:
+    description: "Bypasses the block break requirement to chat."
+    default: op
+  voidchat.globalbypass:
+    description: "Bypasses the global message cooldown."
+    default: op
