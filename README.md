@@ -1,0 +1,140 @@
+# 💬 VoidChat+ | Advanced Communication
+
+**VoidChat+** is a professional, high-performance communication solution for modern Minecraft servers. It provides a complete chat management system by splitting communication into local and global channels, while maintaining top-tier security with integrated Anti-Swear and Anti-Bot mining requirements.
+
+### 🛠️ Key Features
+
+  * **Dual-Channel System** – Seamless transition between local (proximity-based) and global communication (using the `!` prefix).
+  * **Infinite Local Mode** – Configure local chat range to `-1` to cover the entire world or dimension, perfect for specialized survival modes.
+  * **Anti-Bot Security** – Unique system requiring new players to mine a specific amount of blocks before they are granted the ability to chat.
+  * **HEX & PAPI Support** – Full support for modern HEX colors and PlaceholderAPI integration for dynamic, beautiful chat formats.
+  * **Admin Chat Spy** – Allows staff members to monitor local conversations to ensure community guidelines are followed.
+
+-----
+
+### 💻 Installation & Setup
+
+1.  Download the `.jar` file.
+2.  Drop the file into your server's `/plugins` folder.
+3.  Restart your server to generate the configuration files.
+4.  Customize your settings and word filters in `config.yml`.
+
+-----
+
+### 📜〢 Configuration Example
+
+```yaml
+############################################################
+#                                                          #
+#             VOIDCHAT - CREATED BY KUBA_121               #
+#         Professional local & global chat system          #
+#                                                          #
+############################################################
+
+############################################################
+#                                                          #
+#  PERMISSIONS:                                            #
+#  - voidchat.use: Access to basic commands                #
+#  - voidchat.reload: Access to /voidchat reload           #
+#  - voidchat.admin: Access to Admin/Spy/Clear/Toggle      #
+#  - voidchat.color: Ability to use & and HEX colors       #
+#  - voidchat.bypass: Bypass block break requirement       #
+#  - voidchat.globalbypass: Bypass global cooldown         #
+#                                                          #
+############################################################
+
+# --- GENERAL SETTINGS ---
+
+# Time in seconds for global message (!) cooldown.
+# Bypass this with voidchat.globalbypass permission.
+global-message-cooldown: 30
+
+# Distance in blocks for the local chat.
+# Set to -1 for infinite range (everyone in the world hears you).
+local-chat-range: 100.0
+
+# Number of blocks a player must break before they can use the chat.
+blocks-required: 10
+
+# Should the block requirement be active?
+chat-requirement-enabled: true
+
+# --- ANTI SWEAR ---
+anti-swear:
+  # List of words that will be replaced with ****
+  banned-words:
+    - "badword1"
+    - "badword2"
+    - "badword3"
+
+# --- CHAT FORMATTING ---
+# You can use Placeholders from PAPI (if installed) using %placeholder%
+# {player} and {message} are internal placeholders.
+
+# Format for global chat (triggered by ! at the start)
+global-format: "&a&lGLOBAL &r&8»&7 {player}: {message}"
+
+# Format for local chat (based on range)
+local-format: "&e&lLOCAL &r&8»&7 {player}: {message}"
+
+# --- SYSTEM MESSAGES ---
+
+messages:
+  # The global prefix for all system messages
+  prefix: "&b&lVoidChat &r&8»&7"
+
+  # Error when player lacks required permissions
+  no-permission: "%prefix% You lack the &bvoid power &7to do this."
+  
+  # Notification for successful config reload
+  reload-success: "%prefix% Configuration &bpurged &7and &breloaded &7successfully."
+
+  # Message when no one is in range for local chat
+  no-one-in-range: "%prefix% &7The void is silent. No one is close enough to hear you."
+
+  # Requirement message. Use {blocks_required} for remaining count.
+  requirement-not-met: "%prefix% &7Your voice is weak. Break &b{blocks_required} &7more blocks to speak."
+
+  # Global chat cooldown notification
+  global-cooldown: "%prefix% &7The void needs &b{time_remaining}s &7to resonate again."
+
+  # Admin Spy mode toggles
+  admin-enabled: "%prefix% &bAdmin Spy &7is now &aactive&7. All whispers are yours."
+  admin-disabled: "%prefix% &bAdmin Spy &7has been &cdisactivated&7."
+
+  # Global mute notifications (self-toggle)
+  global-muted: "%prefix% &7You have &cclosed &7your ears to the global void."
+  global-unmuted: "%prefix% &7You can now &ahear &7the global resonance again."
+  global-muted-error: "%prefix% &cYou cannot speak while your global ears are closed."
+
+  # Chat Management (Clear & Toggle)
+  chat-cleared: "%prefix% &7The chat has been &bpurified &7by &b{player}&7."
+  chat-toggled-on: "%prefix% &aGlobal resonance has been restored. Chat is now enabled."
+  chat-toggled-off: "%prefix% &cThe void has been silenced. Chat is now disabled."
+  chat-disabled-error: "%prefix% &cThe chat is currently suppressed by an administrator."
+
+  # Command usage and help
+  usage-voidchat: "%prefix% Usage: &b/voidchat &8<&7help/reload/admin/clear/toggle&8>"
+  only-players: "%prefix% &cOnly those with a physical form can use this command."
+
+  # Help menu structure
+  help-menu:
+    - "&8&m--------&r &b&lVoidChat Help &8&m--------"
+    - "&7/voidchat help &8- &fDisplays this menu"
+    - "&7/voidchat reload &8- &fReloads the configuration"
+    - "&7/voidchat admin &8- &fToggle Admin Spy mode"
+    - "&7/voidchat clear &8- &fClear the chat history"
+    - "&7/voidchat toggle &8- &fEnable or disable the chat"
+    - "&7/global <msg> &8- &fSend a global message"
+    - "&bTip: &7Use &b!message &7or &b/g <msg> &7for global!"
+    - "&8&m--------------------------------"
+```
+
+-----
+
+### 🛡️ Support & Community
+
+Join our **Code Hub** for technical support, bug reports, and updates.
+
+  * **Discord:** [[Join Support Server]](https://discord.gg/jdWeSJbcKx)
+  * **Modrinth:** [[Download on Modrinth]](https://modrinth.com/plugin/voidchat+)
