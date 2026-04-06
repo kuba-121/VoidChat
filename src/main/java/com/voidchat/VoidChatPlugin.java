@@ -101,7 +101,7 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
 
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
-                JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+                JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
                 
                 this.latestVersion = json.get("version").getAsString();
                 this.downloadUrl = json.get("url").getAsString();
