@@ -19,6 +19,9 @@
 
 # --- GENERAL SETTINGS ---
 
+# Should the plugin notify you about new updates?
+update-check: true
+
 # Time in seconds for global message (!) cooldown.
 # Bypass this with voidchat.globalbypass permission.
 global-message-cooldown: 30

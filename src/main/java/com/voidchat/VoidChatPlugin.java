@@ -1,7 +1,10 @@
 package com.voidchat;
 
+import org.bstats.bukkit.Metrics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -22,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -48,6 +52,10 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
     private boolean chatEnabled = true;
     private List<String> bannedWords = new ArrayList<>();
 
+    private String latestVersion = null;
+    private String downloadUrl = "";
+    private boolean isImportant = false;
+
     private File dataFile;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -65,6 +73,13 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
             getCommand("voidchat").setTabCompleter(new CommandTabCompleter());
         }
 
+        int pluginId = 30607;
+        new Metrics(this, pluginId);
+
+        if (getConfig().getBoolean("update-check", true)) {
+            checkUpdate();
+        }
+
         getServer().getPluginManager().registerEvents(this, this);
         getLogger().info("VoidChat has been enabled!");
     }
@@ -79,6 +94,39 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
         localFormat = getConfig().getString("local-format", "&e&lLOCAL &r&8»&7 {player}: {message}");
         prefix = colorize(getConfig().getString("messages.prefix", "&b&lVoidChat &r&8»&7 "), null);
         bannedWords = getConfig().getStringList("anti-swear.banned-words");
+    }
+
+    public void checkUpdate() {
+        String url = "https://raw.githubusercontent.com/kuba-121/VoidChat/refs/heads/main/version.json";
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
+                JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+                
+                this.latestVersion = json.get("version").getAsString();
+                this.downloadUrl = json.get("url").getAsString();
+                this.isImportant = json.get("important").getAsBoolean();
+                
+                String currentVersion = getDescription().getVersion();
+
+                if (!currentVersion.equals(latestVersion)) {
+                    getLogger().warning("A new version of VoidChat (v" + latestVersion + ") is available!");
+                    getLogger().warning("Download here: " + downloadUrl);
+                }
+            } catch (Exception ignored) {} 
+        });
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        playerBlocksRemaining.putIfAbsent(player.getUniqueId(), blocksRequired);
+
+        if (latestVersion != null && isImportant && !getDescription().getVersion().equals(latestVersion)) {
+            if (player.hasPermission("voidchat.admin")) {
+                player.sendMessage(prefix + " §c§lNew important update! §f(v" + latestVersion + ")\n§7Download: §n" + downloadUrl);
+            }
+        }
     }
 
     private String filterSwearWords(String message) {
@@ -109,7 +157,7 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
     private String getMessage(String key) {
         String raw = getConfig().getString("messages." + key.replace("_", "-"));
         if (raw == null) return ChatColor.RED + "Missing key: " + key;
-        return colorize(raw.replace("%prefix%", prefix), null);
+        return colorize(raw.replace("%prefix%", getConfig().getString("messages.prefix", "&b&lVoidChat &r&8»&7 ")), null);
     }
 
     private String getFormattedMessage(String format, Player player, String message) {
@@ -218,11 +266,6 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        playerBlocksRemaining.putIfAbsent(event.getPlayer().getUniqueId(), blocksRequired);
-    }
-
-    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         playerGlobalMessageCooldown.remove(event.getPlayer().getUniqueId());
     }
@@ -241,7 +284,7 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
             for (String line : getConfig().getStringList("messages.help-menu")) {
-                sender.sendMessage(colorize(line.replace("%prefix%", prefix), null));
+                sender.sendMessage(colorize(line.replace("%prefix%", getConfig().getString("messages.prefix", "&b&lVoidChat &r&8»&7 ")), null));
             }
             return true;
         }
