@@ -1,5 +1,5 @@
 name: VoidChat
-version: 1.0.2
+version: 1.0.3
 main: com.voidchat.VoidChatPlugin
 api-version: 1.13
 description: "Advanced local/global chat system with Anti-Swear, Chat Clear, and Toggle features."

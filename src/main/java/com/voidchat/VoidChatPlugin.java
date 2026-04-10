@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Listener {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
-
     private final Set<UUID> mutedGlobalChat = ConcurrentHashMap.newKeySet();
     private final Set<UUID> adminSpyEnabled = ConcurrentHashMap.newKeySet();
     private final Map<UUID, Long> playerGlobalMessageCooldown = new ConcurrentHashMap<>();
@@ -48,14 +47,12 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
     private boolean chatRequirementEnabled;
     private String globalFormat;
     private String localFormat;
-    
     private boolean chatEnabled = true;
     private List<String> bannedWords = new ArrayList<>();
 
     private String latestVersion = null;
     private String downloadUrl = "";
     private boolean isImportant = false;
-
     private File dataFile;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -73,15 +70,30 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
             getCommand("voidchat").setTabCompleter(new CommandTabCompleter());
         }
 
-        int pluginId = 30607;
-        new Metrics(this, pluginId);
+        new Metrics(this, 30607);
 
         if (getConfig().getBoolean("update-check", true)) {
-            checkUpdate();
+            Thread updateThread = new Thread(this::checkUpdateLogic, "VoidChat-UpdateCheck");
+            updateThread.setPriority(Thread.MIN_PRIORITY);
+            updateThread.start();
         }
 
         getServer().getPluginManager().registerEvents(this, this);
-        getLogger().info("VoidChat has been enabled!");
+        getLogger().info("VoidChat enabled successfully.");
+    }
+
+    private void checkUpdateLogic() {
+        String url = "https://raw.githubusercontent.com/kuba-121/VoidChat/refs/heads/main/version.json";
+        try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
+            JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
+            this.latestVersion = json.get("version").getAsString();
+            this.downloadUrl = json.get("url").getAsString();
+            this.isImportant = json.get("important").getAsBoolean();
+            
+            if (!getDescription().getVersion().equals(latestVersion)) {
+                getLogger().warning("New version available: v" + latestVersion);
+            }
+        } catch (Exception ignored) {}
     }
 
     private void loadConfiguration() {
@@ -94,27 +106,6 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
         localFormat = getConfig().getString("local-format", "&e&lLOCAL &r&8»&7 {player}: {message}");
         prefix = colorize(getConfig().getString("messages.prefix", "&b&lVoidChat &r&8»&7 "), null);
         bannedWords = getConfig().getStringList("anti-swear.banned-words");
-    }
-
-    public void checkUpdate() {
-        String url = "https://raw.githubusercontent.com/kuba-121/VoidChat/refs/heads/main/version.json";
-
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            try (InputStreamReader reader = new InputStreamReader(new URL(url).openStream())) {
-                JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
-                
-                this.latestVersion = json.get("version").getAsString();
-                this.downloadUrl = json.get("url").getAsString();
-                this.isImportant = json.get("important").getAsBoolean();
-                
-                String currentVersion = getDescription().getVersion();
-
-                if (!currentVersion.equals(latestVersion)) {
-                    getLogger().warning("A new version of VoidChat (v" + latestVersion + ") is available!");
-                    getLogger().warning("Download here: " + downloadUrl);
-                }
-            } catch (Exception ignored) {} 
-        });
     }
 
     @EventHandler
@@ -305,15 +296,6 @@ public class VoidChatPlugin extends JavaPlugin implements CommandExecutor, Liste
                     adminSpyEnabled.add(adminUuid);
                     sender.sendMessage(getMessage("admin-enabled"));
                 }
-                break;
-            case "global":
-                if (!(sender instanceof Player)) return onlyPlayers(sender);
-                if (args.length < 2) {
-                    sender.sendMessage(getMessage("usage-voidchat"));
-                    return true;
-                }
-                String msg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-                handleGlobalChat((Player) sender, msg);
                 break;
             case "clear":
                 if (!sender.hasPermission("voidchat.admin")) return noPerm(sender);
